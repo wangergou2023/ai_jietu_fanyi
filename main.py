@@ -50,11 +50,17 @@ class ScreenshotApp:
     def capture_screenshot(self):
         # 计算框选区域的坐标，确保左上和右下坐标正确
         if self.start_x is not None and self.start_y is not None and self.end_x is not None and self.end_y is not None:
-            left = min(self.start_x, self.end_x)
-            top = min(self.start_y, self.end_y)
-            right = max(self.start_x, self.end_x)
-            bottom = max(self.start_y, self.end_y)
-            
+            # 获取遮罩窗口的左上角坐标
+            overlay_x = self.overlay.winfo_rootx()
+            overlay_y = self.overlay.winfo_rooty()
+
+            # 将框选区域的相对坐标转换为屏幕绝对坐标
+            left = overlay_x + min(self.start_x, self.end_x)
+            top = overlay_y + min(self.start_y, self.end_y)
+            right = overlay_x + max(self.start_x, self.end_x)
+            bottom = overlay_y + max(self.start_y, self.end_y)
+
+            # 截图
             region = (left, top, right, bottom)
             screenshot = ImageGrab.grab(bbox=region)
             screenshot.show()
@@ -67,7 +73,6 @@ class ScreenshotApp:
 
     def run(self):
         print("请用鼠标框选截图区域，按下鼠标左键开始，拖动框选，释放鼠标左键结束。")
-        time.sleep(1)  # 给用户1秒钟的准备时间
 
         self.overlay.deiconify()  # 显示遮罩窗口
         self.overlay.mainloop()  # 启动事件循环
