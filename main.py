@@ -48,6 +48,9 @@ class ScreenshotApp:
         self.capture_screenshot()
 
     def capture_screenshot(self):
+        # 在截图前先关闭遮罩窗口
+        self.overlay.withdraw()
+
         # 计算框选区域的坐标，确保左上和右下坐标正确
         if self.start_x is not None and self.start_y is not None and self.end_x is not None and self.end_y is not None:
             # 获取遮罩窗口的左上角坐标
@@ -67,8 +70,7 @@ class ScreenshotApp:
             screenshot.save("screenshot.png")
             print("截图已保存为 screenshot.png")
 
-        # 完成截图后关闭遮罩窗口并退出程序
-        self.overlay.quit()  # 退出当前遮罩窗口
+        # 完成截图后退出程序
         self.root.quit()  # 退出主循环
 
     def run(self):
