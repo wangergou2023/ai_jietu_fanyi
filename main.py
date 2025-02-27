@@ -1,6 +1,13 @@
 import tkinter as tk
-from PIL import ImageGrab
-import time
+from PIL import ImageGrab, Image
+import base64
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    api_key = "...",
+    base_url = "https://llxspace.website/v1"
+)
 
 class ScreenshotApp:
     def __init__(self):
@@ -70,8 +77,45 @@ class ScreenshotApp:
             screenshot.save("screenshot.png")
             print("截图已保存为 screenshot.png")
 
+            # 调用识别函数
+            self.recognize_image("screenshot.png")
+
         # 完成截图后退出程序
         self.root.quit()  # 退出主循环
+
+    def recognize_image(self, image_path):
+        # 将截图转为 Base64 编码
+        base64_image = self.encode_image(image_path)
+
+        # 定义图像的 MIME 类型
+        img_type = "image/png"  # 根据截图类型（这里是 PNG）
+
+        # 发送图像给 OpenAI 模型进行处理
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",  # 或者你想用的其他模型
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "请识别图片内容"},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{img_type};base64,{base64_image}",
+                            },
+                        },
+                    ],
+                }
+            ],
+        )
+
+        # 打印模型的回答
+        print(response.choices[0].message.content)
+
+
+    def encode_image(self, image_path):
+        with open(image_path, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode("utf-8")
 
     def run(self):
         print("请用鼠标框选截图区域，按下鼠标左键开始，拖动框选，释放鼠标左键结束。")
